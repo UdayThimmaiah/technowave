@@ -1,0 +1,4 @@
+#!/bin/bash
+SystemInfo
+time
+date

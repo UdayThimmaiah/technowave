@@ -1,2 +1,6 @@
 something added for testing
+<<<<<<< HEAD
 editing this for testing revert
+=======
+with Git:
+>>>>>>> 4f7085797109673a0f153334a58dd2c81531ab03
