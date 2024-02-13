@@ -5,7 +5,8 @@ pipeline {
         stage('Hello') {
             steps {
                 echo 'STARMARK'
-                echo "VA ORION"
+                echo "SystemInfo"
+		echo "Hostname"
             
             }
         }
