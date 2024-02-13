@@ -1,0 +1,33 @@
+pipeline{
+agent any
+        stages{
+            stage('Build-System details'){
+                steps{
+		    sh '''
+                    echo '"ip adress"'
+		    hostname -I 
+		      '''
+                }
+            }
+            stage('Build-CPU details'){
+                steps{
+		    sh '''
+                    echo "System Info"
+                  
+                }
+            }
+            stage('Todays date'){
+                steps{
+		    sh '''
+                    echo "TODAYS DATE"
+                    date
+		    '''
+                }
+            }
+		
+                    '''
+                }
+            }
+
+        }
+}
