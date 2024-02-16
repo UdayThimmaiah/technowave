@@ -1,0 +1,16 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'STARMARK'
+                echo "SystemInfo"
+		        echo "Hostname"
+		        echo "WELCOME TO BANGALORE WINGS"
+            
+            }
+        }
+    }
+}
+
