@@ -1,0 +1,91 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+  <actions/>
+  <description>Delete Int Service Logs</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.8.1">
+      <gitLabConnection/>
+      <jobCredentialId/>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Server</name>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>192.168.168.115</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@2.1">
+      <command># Days older than
+$OlderThan = 2
+
+# Path to the root folder
+$Path = "D:\VitalAxis\INT_SERVICE\INT-SERVICE-LOGS"
+
+[Array] $Servers = $ENV:Server -split ','
+
+$PropertyMapping = ConvertFrom-StringData (Get-Content "D:\VitalAxis\Jenkins_Build\ORION\Orion.properties" -Raw)
+$Username = $PropertyMapping."va.orion.username"
+$Password = $PropertyMapping."va.orion.password"
+$SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
+$Credentials = [PSCredential]::new("$Username", $SecurePassword)
+
+foreach($Server in $Servers){
+    Invoke-Command -ComputerName $Server -ScriptBlock {
+        $FreeSpaceBeforeCleanup = (Get-PSDrive D).Free
+        $FreeSpaceBeforeCleanup = [Math]::round($FreeSpaceBeforeCleanup/1Gb, 3)
+
+        Write-Host "Filtering files older than $using:OlderThan days..."
+        [System.Array] $Folders = Get-ChildItem -Path $using:Path -Directory -Recurse | Where Name -ne 'Mirth'
+
+        if($Files.Count -gt 0){
+            foreach($Folder in $Folders){
+                [System.Array] $Files = Get-ChildItem -Path $Folder.FullName -File | Where LastWriteTime -lt (Get-Date).AddDays(-$using:OlderThan)
+                foreach($File in $Files){
+                    if(Test-Path -Path $File.FullName){
+                        Write-Host "Deleting $($File.FullName)"
+                        Remove-Item -Path $File.FullName -Force -ErrorAction SilentlyContinue
+                    }
+                }
+            }
+
+            $FreeSpaceAfterCleanup = (Get-PSDrive D).Free
+            $FreeSpaceAfterCleanup = [Math]::round($FreeSpaceAfterCleanup/1Gb, 3)
+            
+            Write-Host ''
+            Write-Host "Server = $using:Server"
+            Write-Host "Free Space Before Cleanup = $FreeSpaceBeforeCleanup GB"
+            Write-Host "Free Space After Cleanup = $FreeSpaceAfterCleanup GB"
+        }
+        else{
+            Write-Host "No files match the filter."
+        }
+    } -Credential $Credentials
+}
+</command>
+      <configuredLocalRules/>
+      <useProfile>true</useProfile>
+      <stopOnError>false</stopOnError>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.27"/>
+  </buildWrappers>
+</project>

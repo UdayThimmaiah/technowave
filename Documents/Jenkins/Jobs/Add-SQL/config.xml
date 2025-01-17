@@ -1,0 +1,86 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+  <description>Add access to SQL Database to an AD or SQL User</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.8.1">
+      <gitLabConnection/>
+      <jobCredentialId/>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>UserName</name>
+          <description>AD/SQL User Name
+Example 1: ad\va.orion
+Example 2: TITANQC_RO</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DBName</name>
+          <description>Name of Database</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Server</name>
+          <description>Database Server IP</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>192.168.168.26</string>
+              <string>192.168.168.27</string>
+              <string>192.168.168.94</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>AccessMode</name>
+          <description>Access Level
+Example 1: db_owner
+Example 2: db_datareader</description>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@2.1">
+      <command>"-----------------------------"
+"UserName   = $ENV:UserName"
+"DBName     = $ENV:DBName"
+"Server     = $ENV:Server"
+"AccessMode = $ENV:AccessMode"
+"-----------------------------"
+
+$AddAccessQuery = @"
+CREATE USER [$ENV:UserName] FOR LOGIN [$ENV:UserName] WITH DEFAULT_SCHEMA = [dbo]
+EXEC sp_addrolemember '$ENV:AccessMode', '$ENV:UserName'
+GO
+"@
+
+$PropertyMapping = ConvertFrom-StringData (Get-Content "D:\VitalAxis\Jenkins_Build\ORION\Orion.properties" -Raw)
+$Username = $PropertyMapping."va.orion.username"
+$Password = $PropertyMapping."va.orion.password"
+$SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
+$Credentials = [PSCredential]::new("$Username", $SecurePassword)
+
+Invoke-Sqlcmd -ServerInstance $ENV:Server -Database $ENV:DBName -Credential $Credentials -Query $AddAccessQuery
+</command>
+      <configuredLocalRules/>
+      <useProfile>true</useProfile>
+      <stopOnError>true</stopOnError>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.27"/>
+  </buildWrappers>
+</project>

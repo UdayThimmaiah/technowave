@@ -1,0 +1,104 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+  <actions/>
+  <description>Check / Update [Add New / Overwrite Existing] Value of selected Key in Web.config file of selected IIS Site.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.8.1">
+      <gitLabConnection/>
+      <jobCredentialId/>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Server</name>
+          <description>Server where the IIS Site is hosted</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>192.168.168.45</string>
+              <string>192.168.168.60</string>
+              <string>192.168.168.81</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Operation</name>
+          <description>Operation to perform on the selected IIS Site</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>Check_Value</string>
+              <string>Update_Value</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@382.v5697b_32134e8">
+          <name>IISSite</name>
+          <description>IIS Site Name ( Maintained in a Properties file ) ( Run "Update-IISSitesList" Job to update the file )</description>
+          <quoteValue>false</quoteValue>
+          <saveJSONParameterToFile>false</saveJSONParameterToFile>
+          <visibleItemCount>5</visibleItemCount>
+          <type>PT_MULTI_LEVEL_SINGLE_SELECT</type>
+          <value>Server,IISSite</value>
+          <propertyFile>D:\VitalAxis\Jenkins_Build\ORION\Properties\IISSiteNames.properties</propertyFile>
+          <multiSelectDelimiter>,</multiSelectDelimiter>
+          <projectName>Update-WebConfig</projectName>
+        </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>Key</name>
+          <description>Name of the Key in Web.config</description>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.8.3">
+          <name>Value</name>
+          <description>New Value for the selected Key [ Only required if Operation = Update ]</description>
+          <randomName>choice-parameter-1816365083341500</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1341.va_2819b_414686">
+              <script>if(Operation.equals('Check_Value')){
+    return """&lt;input type=\"text\" name=\"value\" value=\"-\" class=\"jenkins-input\"/&gt;"""
+}
+else if(Operation.equals('Update_Value')){
+    return """&lt;input type=\"text\" name=\"value\" value=\"\" class=\"jenkins-input\"/&gt;"""
+}
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1341.va_2819b_414686">
+              <script>return ''</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Update-WebConfig</projectName>
+          <projectFullName>ORION/Update-WebConfig</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>Operation</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <customWorkspace>D:\VitalAxis\Jenkins_Build\ORION</customWorkspace>
+  <builders>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@2.1">
+      <command>PowerShell .\Update-WebConfig.ps1 -Server $ENV:Server -Operation $ENV:Operation -IISSite $ENV:IISSite -Key $ENV:Key -Value $ENV:Value</command>
+      <configuredLocalRules/>
+      <useProfile>true</useProfile>
+      <stopOnError>true</stopOnError>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.27"/>
+  </buildWrappers>
+</project>

@@ -1,0 +1,277 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+  <actions/>
+  <description>Create multiple new URLs (Multiple IIS + Single Database)</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.8.1">
+      <gitLabConnection/>
+      <jobCredentialId/>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.TextParameterDefinition>
+          <name>SiteNames</name>
+          <description>List of IIS Site Names to create.
+Example:
+TITAN-SPRINT-LIS-VOWEB
+TITAN-SPRINT-LIS-VOAPI</description>
+          <trim>false</trim>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Customization</name>
+          <description>Custom URL naming convention</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>None</string>
+              <string>WebAPI</string>
+              <string>WCF</string>
+              <string>VO</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>IISServer</name>
+          <description>IIS Server where the URL will be created</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>-</string>
+              <string>192.168.168.45</string>
+              <string>192.168.168.60</string>
+              <string>192.168.168.81</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.8.3">
+          <name>LogsServer</name>
+          <description>Server where Website Logs will be stored (Leave it blank if Website-Logs folder isn't required)</description>
+          <randomName>choice-parameter-1072930236427899</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1341.va_2819b_414686">
+              <script>return """&lt;input type=\"text\" name=\"value\" value=\"${IISServer}\" class=\"jenkins-input\"/&gt;"""</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1341.va_2819b_414686">
+              <script>return ''</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Create-NewURLs</projectName>
+          <projectFullName>ORION/Create-NewURLs</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>IISServer</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.8.3">
+          <name>FilesServer</name>
+          <description>Server where Website Files will be stored (Leave it blank if Website-Files folder isn't required)</description>
+          <randomName>choice-parameter-1072930320897300</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1341.va_2819b_414686">
+              <script>if(IISServer.equals('192.168.168.45')){
+    return """&lt;input type=\"text\" name=\"value\" value=\"192.168.168.115\" class=\"jenkins-input\"/&gt;"""
+}
+else if(IISServer.equals('192.168.168.60')){
+    return """&lt;input type=\"text\" name=\"value\" value=\"192.168.168.68\" class=\"jenkins-input\"/&gt;"""
+}
+else if(IISServer.equals('192.168.168.81')){
+    return """&lt;input type=\"text\" name=\"value\" value=\"192.168.168.63\" class=\"jenkins-input\"/&gt;"""
+}
+else{
+    return """&lt;input type=\"text\" name=\"value\" value=\"-\" class=\"jenkins-input\"/&gt;"""
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1341.va_2819b_414686">
+              <script>return ''</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Create-NewURLs</projectName>
+          <projectFullName>ORION/Create-NewURLs</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>IISServer</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.8.3">
+          <name>DBName</name>
+          <description>Name of Database (Leave it blank if creation of a DB isn't required)</description>
+          <randomName>choice-parameter-1072931411876200</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1341.va_2819b_414686">
+              <script>return """&lt;input type=\"text\" name=\"value\" value=\"\" class=\"jenkins-input   \"/&gt;"""</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1341.va_2819b_414686">
+              <script>return ''</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Create-NewURLs</projectName>
+          <projectFullName>ORION/Create-NewURLs</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters/>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.8.3">
+          <name>DBServer</name>
+          <description>Server where Database is created (Leave it blank if creation of a DB isn't required)</description>
+          <randomName>choice-parameter-1072931413965700</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1341.va_2819b_414686">
+              <script>if(IISServer.equals('192.168.168.45')){
+    return """&lt;input type=\"text\" name=\"value\" value=\"192.168.168.27\" class=\"jenkins-input\"/&gt;"""
+}
+else if(IISServer.equals('192.168.168.60')){
+    return """&lt;input type=\"text\" name=\"value\" value=\"192.168.168.26\" class=\"jenkins-input\"/&gt;"""
+}
+else if(IISServer.equals('192.168.168.81')){
+    return """&lt;input type=\"text\" name=\"value\" value=\"192.168.168.94\" class=\"jenkins-input\"/&gt;"""
+}
+else{
+    return """&lt;input type=\"text\" name=\"value\" value=\"192.168.168.26\" class=\"jenkins-input\"/&gt;"""
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1341.va_2819b_414686">
+              <script>return ''</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Create-NewURLs</projectName>
+          <projectFullName>ORION/Create-NewURLs</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>IISServer</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>DBSource</name>
+          <description>Server where Source DB is located</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>-</string>
+              <string>192.168.168.49</string>
+              <string>192.168.168.26</string>
+              <string>192.168.168.27</string>
+              <string>192.168.168.94</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.8.3">
+          <name>DBSourceDeployment</name>
+          <description>Source Deployment bak to restore from (Leave it blank if creation of a DB isn't required)
+Example 1: LIS                         (When Source = 49)
+Example 2: TITAN-SPRINT-LIS  (When Source = 26)</description>
+          <randomName>choice-parameter-1072932515062500</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1341.va_2819b_414686">
+              <script>return """&lt;input type=\"text\" name=\"value\" value=\"\" class=\"jenkins-input\"/&gt;"""</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1341.va_2819b_414686">
+              <script>return ''</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Create-NewURLs</projectName>
+          <projectFullName>ORION/Create-NewURLs</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters/>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>true</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@2.1">
+      <command># IIS
+if(($ENV:SiteNames -ne $null) -and ($ENV:IISServer -ne '-')){
+    [Array] $SiteNames = $ENV:SiteNames -split '\n'
+
+    foreach($SiteName in $SiteNames){
+        $TeamName = $null
+        $Environment = $null
+        $Deployment = $null
+        $URL = $null
+        $IISServer = $null
+        $LogsServer = $null
+        $FilesServer = $null
+
+        $TeamName = $SiteName -replace '(\w+)(-.*)', '$1'
+        $Environment = $SiteName -replace '(\w+-)(\w+)(-.*)', '$2'
+        $Deployment = $SiteName -replace '(\w+-\w+-)(.*)', '$2'
+
+        $DomainName = '.vitalaxis.com'
+        if($Deployment -match '(VPLABS|QUEST)'){
+            $DomainName = '.vitalpath.net'
+        }
+        $URL = "${TeamName}${Environment}${Deployment}".ToLower() + $DomainName
+
+        if($ENV:Customization -eq 'WebAPI'){
+            $DeploymentName = $Deployment -replace('-VAWEBAPIServices$', "")
+            $URL = "${TeamName}${Environment}${DeploymentName}apiservices".ToLower() + $DomainName
+        }
+        elseif($ENV:Customization -eq 'WCF'){
+            $DeploymentName = $Deployment -replace('-VAAPIServices$', "")
+            $URL = "${TeamName}${Environment}${DeploymentName}services".ToLower() + $DomainName
+        }
+        elseif($ENV:Customization -eq 'VO'){
+            $DeploymentName = $Deployment -replace('-VOWEB$', "VO")
+            $DeploymentName = $DeploymentName -replace('-VOAPI$', "VOAPI")
+            $URL = "${TeamName}${Environment}${DeploymentName}".ToLower() + $DomainName
+        }
+
+        $IISServer = $ENV:IISServer
+
+        if($ENV:LogsServer -eq $null){
+            $LogsServer = '-'
+        }
+        else{
+            $LogsServer = $ENV:LogsServer
+        }
+
+        if($ENV:FilesServer -eq $null){
+            $FilesServer = '-'
+        }
+        else{
+            $FilesServer = $ENV:FilesServer
+        }
+
+        PowerShell D:\VitalAxis\Jenkins_Build\ORION\Automate-IIS_Setup.ps1 -TeamName "$TeamName" -Environment "$Environment" -Deployment "$Deployment" -URL "$URL" -IISServer "$IISServer" -LogsServer "$LogsServer" -FilesServer "$FilesServer"
+    }
+}
+
+# DB
+if(($ENV:DBName -ne $null) -and ($ENV:DBServer -ne $null) -and ($ENV:DBSource -ne '-') -and ($ENV:DBSourceDeployment -ne $null)){
+    PowerShell D:\VitalAxis\Jenkins_Build\ORION\Automate-DB_Setup.ps1 -DBName "$ENV:DBName" -DBServer "$ENV:DBServer" -DBSource "$ENV:DBSource" -DBSourceDeployment "$ENV:DBSourceDeployment"
+}
+</command>
+      <configuredLocalRules/>
+      <useProfile>true</useProfile>
+      <stopOnError>true</stopOnError>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.27"/>
+  </buildWrappers>
+</project>

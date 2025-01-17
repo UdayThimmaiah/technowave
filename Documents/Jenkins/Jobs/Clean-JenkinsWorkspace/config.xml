@@ -1,0 +1,67 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+  <actions/>
+  <description>Delete "buildspace" folders of all Jenkins Jobs</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.8.1">
+      <gitLabConnection/>
+      <jobCredentialId/>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>30 23 */7 * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@2.1">
+      <command># Days older than
+$OlderThan = 2
+
+# Path to the root folder
+$Path = "D:\VitalAxis\Jenkins_Build"
+
+$FreeSpaceBeforeCleanup = (Get-PSDrive D).Free
+$FreeSpaceBeforeCleanup = [Math]::round($FreeSpaceBeforeCleanup/1Gb, 3)
+
+Write-Host "Filtering folders older than $OlderThan days..."
+[System.Array] $Folders = Get-ChildItem -Path $Path -Directory -Recurse | Where Name -Match '^(\d*_)?(\d{12})$' | Where FullName -Match '\\buildspace\\' | Where LastWriteTime -lt (Get-Date).AddDays(-$OlderThan)
+
+if($Folders.Count -gt 0){
+    foreach($Folder in $Folders){
+        if(Test-Path -Path $Folder.FullName){
+            Write-Host "Deleting $($Folder.FullName)"
+            Remove-Item -Path $Folder.FullName -Recurse -Force
+        }
+    }
+
+    $FreeSpaceAfterCleanup = (Get-PSDrive D).Free
+    $FreeSpaceAfterCleanup = [Math]::round($FreeSpaceAfterCleanup/1Gb, 3)
+    
+    Write-Host ''
+    Write-Host "Free Space Before Cleanup = $FreeSpaceBeforeCleanup GB"
+    Write-Host "Free Space After Cleanup = $FreeSpaceAfterCleanup GB"
+}
+else{
+    Write-Host "No folders match the filter."
+}
+</command>
+      <configuredLocalRules/>
+      <useProfile>true</useProfile>
+      <stopOnError>false</stopOnError>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.27"/>
+  </buildWrappers>
+</project>

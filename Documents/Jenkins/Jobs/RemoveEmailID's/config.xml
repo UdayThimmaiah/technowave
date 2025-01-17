@@ -1,0 +1,94 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?><project>
+  <description>Scan all Jenkins Jobs and remove given email id.&#13;
+( Restart Jenkins Service after running this Job )</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.8.1">
+      <gitLabConnection/>
+      <jobCredentialId/>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>Email</name>
+          <description>Email Id to search and remove from Jenkins Build Job Email Notifications.
+Example: orion@starmarkit.com</description>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Server</name>
+          <description>Jenkins Server</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>192.168.168.129</string>
+              <string>192.168.168.130</string>
+              <string>192.168.168.131</string>
+              <string>192.168.168.133</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <jdk>(System)</jdk>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@2.1">
+      <command># Scan all Jenkins Jobs and remove given email id
+$Email = $ENV:Email
+$Server = $ENV:Server
+
+$JobsPath = "\\$Server\d$\VitalAxis\Jenkins_Build\ORION\bin\Jenkins_Jobs\DevOps\Jenkins_Jobs_Categorized_By_Jenkins_Servers\$Server"
+$JobsRoot = "\\$Server\c$\ProgramData\Jenkins\.jenkins\jobs"
+
+[System.Array] $Jobs = Get-ChildItem -File -Recurse -LiteralPath $JobsPath
+
+$Count = 0
+
+foreach($Job in $Jobs){
+    $FileContent = ''
+    $JobFile = ''
+
+    $JobFile = $Job.FullName.Replace($JobsPath, $JobsRoot)
+
+    if(Test-Path $JobFile){
+        $FileContent = Get-Content -Raw -LiteralPath $JobFile
+        if($FileContent -match $Email){
+            $Count++;
+            "Removing email id in: $($Job.FullName.Replace($JobsPath, ''))"
+
+            $FileContent = $FileContent -replace ("$Email,", '') -replace (",$Email", '')
+            $FileContent = $FileContent -replace ("$Email", '')
+    
+            [System.IO.File]::WriteAllText($JobFile, $FileContent)
+        }
+    }
+}
+
+if($Count -gt 0){
+    ""
+    "Removed Email $Email in $Count job(s)"
+}
+else{
+    ""
+    "Found Email $Email in $Count job(s)"
+}
+</command>
+      <configuredLocalRules/>
+      <useProfile>true</useProfile>
+      <stopOnError>true</stopOnError>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.27"/>
+  </buildWrappers>
+</project>
